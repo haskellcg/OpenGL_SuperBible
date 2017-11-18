@@ -1,7 +1,7 @@
 ## drawtriangle代码解读
 程序运行结果![运行结果](https://github.com/haskellcg/Blog_Pictures/blob/master/Chapter_2_%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB_1.PNG)
 
-### drawtriangle_test函数
+#### drawtriangle_test函数
 ```c++
 int drawtriangle_test(int argc, char *argv[])
 {
@@ -35,3 +35,83 @@ int drawtriangle_test(int argc, char *argv[])
   * glewInit: GLEW函数，初始化GLEW库，重新调用GLEW库初始化OpenGL驱动程序中所有丢失的入口点，以确保OpenGL API对我们来说完全可用
   * SetupRC: 这个函数对GLUT没有什么影响，但是在实际开始渲染之前，我们在这里进行任何OpenGL初始化都非常方便。这里的RC代表渲染环境(Rendering Context)，这是一个运行中的OpenGL状态机的句柄。在任何OpenGL函数起作用之前必须创建渲染环境，而GLUT在我们第一次创建窗口时就完成了这项工作
   * glutMainLoop: 开始主消息循环，该函数被调用之后，在主窗口被关闭之前都不会返回，并且一个应用程序中只需要调用一次，这个函数负责处理所有操作系统特定的消息、按键动作
+
+#### ChangeSize函数
+```c++
+void ChangeSize(int w, int h)
+{
+	glViewport(0, 0, w, h);
+}
+```
+  由于在不同环境下窗口的大小变化检测和处理方式也不同，GLUT库专门为此提供了glutRashapeFunc函数，该函数注册了一个回调，供GLUT库在窗口纬度改变时调用。
+  
+```c++
+void glViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+```
+  glViewport修改从目标坐标到屏幕坐标系的映射，要理解视口分辨率。
+  
+  在开始将几何图形光栅化(实际绘制)到屏幕上时，OpenGL负责笛卡尔坐标系和窗口像素，我们要牢记，就是改变视口并不会改变基础坐标系，由于我们采用默认的-1到+1的映射，为三角形改变窗口大小会产生一些有趣的结果。
+  
+#### SetupRC函数
+```c++
+void SetupRC()
+{
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+	shaderManager.InitializeStockShaders();
+
+	GLfloat vVerts[] = {
+		-0.5f, 0.0f, 0.0f,
+		0.5f, 0.0f, 0.0f,
+		0.0f, 0.5f, 0.0f
+	};
+	triangleBatch.Begin(GL_TRIANGLES, 3);
+	triangleBatch.CopyVertexData3f(vVerts);
+	triangleBatch.End();
+}
+```
+  设置渲染环境，首先设置背景颜色，使用函数:
+```c++
+void glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
+```
+  glCLearColor最后一个参数alpha，它用来进行混合，产生一些特殊的效果，例如透明，当然不仅仅依靠alpha就可以了。
+  
+  没有着色器，在OpenGL核心框架中就无法进行任何渲染。我们先使用简单的存储着色器，它们可以用着色器管理器进行管理:  
+```c++
+GLShaderManager shaderManager;
+...
+shaderManager.InitializeStockShaders();
+```
+  
+  在OpenGL中，三角形是一种“图元”类型，是一种基本的3D绘图元素。我们通过将这些顶点放进一个单个浮点数数组来指定它们。本书中会讲解关于提交一个批次的顶点用于渲染的内容。一个简单的GLTool封装类会将三角形顶点进行封装：
+```c++
+GLBatch triangleBatch;
+...
+triangleBatch.Begin(GL_TRIANGLES, 3);
+triangleBatch.CopyVertexData3f(vVerts);
+triangleBatch.End();
+```
+
+#### RenderScene函数
+```c++
+void RenderScene(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	GLfloat vRed[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+	shaderManager.UseStockShader(GLT_SHADER_IDENTITY, vRed);
+	triangleBatch.Draw();
+
+	glutSwapBuffers();
+}
+```
+  前面我们将清除颜色设置为蓝色，现在我们需要执行一个函数真正进行清除：glClear, glClear函数清除一个或一组特定的缓冲区，缓冲区是一块存储图像信息的存储空间，红色、绿色、蓝色、alpha分量通常一起作为颜色缓冲区或者像素缓冲区引用。
+  
+  OpenGL中不只一种缓冲区(颜色缓冲区、深度缓冲区、模版缓冲区)。
+  
+  我们设置一组浮点数来表示红色，并将它传递给存储着色器，即GLT_SHADER_IDENTITY着色器，该着色器只是使用指定的颜色以默认笛卡尔坐标系在屏幕上渲染几何图形。GLBatch的Draw方法指示将几何图形提交给着色器。
+  
+  在设置OpenGL窗口时，我们指定要一个双缓冲区渲染环境，这就意味着将在后台进行渲染，然后在结束时提交给前台，这种形式能够防止观察者看到可能伴随动画帧与动画帧之间闪烁的渲染过程。缓冲区减缓将以平台特定的方式进行，GLUT有一个单独的函数调用可以完成:
+```c++
+glutSwapBuffers();
+```
