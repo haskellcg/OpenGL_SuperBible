@@ -115,3 +115,8 @@ void RenderScene(void)
 ```c++
 glutSwapBuffers();
 ```
+
+## drawsquaremove代码解读
+  **把所有代码整合到一块，难免代码会重名，所以在后面的编写过程中尽量添加static关键字**
+  
+  
