@@ -119,4 +119,72 @@ glutSwapBuffers();
 ## drawsquaremove代码解读
   **把所有代码整合到一块，难免代码会重名，所以在后面的编写过程中尽量添加static关键字**
   
+  程序运行结果(按'->'):
+  ![运行结果](https://github.com/haskellcg/Blog_Pictures/blob/master/Chapter_2_%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB_2.PNG)
+  ![运行结果](https://github.com/haskellcg/Blog_Pictures/blob/master/Chapter_2_%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB_3.PNG)
   
+#### 修改部分
+  ```c++
+  squareBatch.Begin(GL_TRIANGLE_FAN, 4);
+  squareBatch.CopyVertexData3f(vVerts);
+  squareBatch.End();
+  ```
+  改程序画矩形，使用了GL_TRIANGLE_FAN，这样多个三角形连起来就形成结果中的矩形
+      
+#### 添加部分
+  ```c++
+  glutSpecialFunc(SpecialKeys);
+  ```
+  使用GLUT注册一个回调函数，该函数能够在按特殊键时被调用
+  
+  ```c++
+  static void SpecialKeys(int key, int x, int y)
+  {
+	GLfloat stepSize = 0.1f;
+
+	GLfloat blockX = vVerts[0];
+	GLfloat blockY = vVerts[7];
+
+	if (GLUT_KEY_UP == key){
+		blockY += stepSize;
+	} else if (GLUT_KEY_DOWN == key){
+		blockY -= stepSize;
+	} else if (GLUT_KEY_LEFT == key){
+		blockX -= stepSize;
+	} else if (GLUT_KEY_RIGHT == key){
+		blockX += stepSize;
+	}
+
+	if (blockX < -1.0f){
+		blockX = -1.0f;
+	}
+	if (blockX > (1.0f - blockSize * 2)){
+		blockX = 1.0f - blockSize * 2;
+	}
+	if (blockY > 1.0f){
+		blockY = 1.0f;
+	}
+	if (blockY < (-1.0f + blockSize * 2)){
+		blockY = -1.0f + blockSize * 2;
+	}
+
+	vVerts[0] = blockX;
+	vVerts[1] = blockY - blockSize * 2;
+	vVerts[3] = blockX + blockSize * 2;
+	vVerts[4] = blockY - blockSize * 2;
+	vVerts[6] = blockX + blockSize * 2;
+	vVerts[7] = blockY;
+	vVerts[9] = blockX;
+	vVerts[10] = blockY;
+
+	squareBatch.CopyVertexData3f(vVerts);
+
+	glutPostRedisplay();
+  }
+  ```
+  该函数实现了按键之后的响应，根据按键计算移动之后的位置，并**检查边界做碰撞检测**，之后根据移动后的点计算其他点的位置，进行重绘
+  
+  ```c++
+  glutPostRedisplay();
+  ```
+  该函数告诉GLUT需要更新窗口内容，默认情况下，在窗口创建、改变大小或者重绘时，GLUT通过调用RenderScene函数更新窗口，只要窗口发生最小化、恢复、最小化、覆盖、重新显示等变化，就会发生更新。我们可以人工调用glutPostRedisplay来告诉GLUT发生了某些变化，应该对场景进行渲染了。
