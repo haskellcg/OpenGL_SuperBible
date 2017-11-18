@@ -188,3 +188,86 @@ glutSwapBuffers();
   glutPostRedisplay();
   ```
   该函数告诉GLUT需要更新窗口内容，默认情况下，在窗口创建、改变大小或者重绘时，GLUT通过调用RenderScene函数更新窗口，只要窗口发生最小化、恢复、最小化、覆盖、重新显示等变化，就会发生更新。我们可以人工调用glutPostRedisplay来告诉GLUT发生了某些变化，应该对场景进行渲染了。
+
+## drawsquarebounce代码解读
+  利用窗口定时重绘，OpenGL会调用RenderScene函数，来更新位置形成动画效果
+  
+  程序运行结果:  
+  ![运行结果](https://github.com/haskellcg/Blog_Pictures/blob/master/Chapter_2_%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB_4.PNG)
+  ![运行结果](https://github.com/haskellcg/Blog_Pictures/blob/master/Chapter_2_%E4%BB%A3%E7%A0%81%E8%A7%A3%E8%AF%BB_5.PNG)
+  
+#### 修改部分
+  背景色，以及前景色:
+  ```c++
+  //默认就是黑色
+  glClearColor(0.0f, 0.0f, 0.4f, 1.0f);
+  
+  GLfloat vGreen[] = {1.0f, 1.0f, 0.0f, 1.0f};
+  shaderManager.UseStockShader(GLT_SHADER_IDENTITY, vGreen);
+  squareBatch.Draw();
+  ```
+  
+  在RenderScene中添加位置更新以及刷新屏幕代码:
+  ```c++
+  static void RenderScene(void)
+  {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	GLfloat vGreen[] = {1.0f, 1.0f, 0.0f, 1.0f};
+	shaderManager.UseStockShader(GLT_SHADER_IDENTITY, vGreen);
+	squareBatch.Draw();
+
+	glutSwapBuffers();
+
+	BounceFunction();
+	glutPostRedisplay();
+  }
+  ```
+
+#### 添加部分
+  更新square位置更新的函数
+  ```c++
+  static void BounceFunction(void)
+  {
+	//设置不同的值，移动轨迹会慢慢改变
+	static GLfloat xDir = 0.25f;
+	static GLfloat yDir = 0.28f;
+
+	GLfloat stepSize = 0.04f;
+	
+	GLfloat blockX = vVerts[0];
+	GLfloat blockY = vVerts[7];
+
+	blockX += stepSize * xDir;
+	blockY += stepSize * yDir;
+
+	if (blockX < -1.0f){
+		blockX = -1.0f;
+		xDir *= -1.0f;
+	}
+	if (blockX > (1.0f - blockSize * 2)){
+		blockX = 1.0f - blockSize * 2;
+		xDir *= -1.0f;
+	}
+	if (blockY > 1.0f){
+		blockY = 1.0f;
+		yDir *= -1.0f;
+	}
+	if (blockY < (-1.0f + blockSize * 2)){
+		blockY = -1.0f + blockSize * 2;
+		yDir *= -1.0f;
+	}
+
+	vVerts[0] = blockX;
+	vVerts[1] = blockY - blockSize * 2;
+	vVerts[3] = blockX + blockSize * 2;
+	vVerts[4] = blockY - blockSize * 2;
+	vVerts[6] = blockX + blockSize * 2;
+	vVerts[7] = blockY;
+	vVerts[9] = blockX;
+	vVerts[10] = blockY;
+
+	squareBatch.CopyVertexData3f(vVerts);
+  }
+  ```
+  xDir/yDir是X、Y方向的移动速度矢量，遇到边界反向可以形成碰撞反弹的效果
