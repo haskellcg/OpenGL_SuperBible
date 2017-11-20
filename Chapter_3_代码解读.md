@@ -56,10 +56,15 @@
   shaderManager.InitializeStockShaders();
   ```
   
-  * 属性: OpenGL支持多达16种可以为每个顶点设置不同的类型参数，这些参数编号从0到15，并且可以与**顶点着色器**中的任何指定变量相关联。**存储着色器**为每个变量都使用一致的内部变量命名规则和相同的属性槽
+  * 属性: OpenGL支持多达16种可以为每个顶点设置不同的类型参数，这些参数编号从0到15，并且可以与**顶点着色器**中的任何指定变量相关联。**存储着色器**为每个变量都使用一致的内部变量命名规则和相同的属性槽  
+  
   标识符|描述
   -----|----
-  GLT
+  GLT_ATTRIBUTE_VERTEX|3分量(x, y, z)顶点位置
+  GLT_ATTRIBUTE_COLOR|4分量(r, g, b, a)颜色值
+  GLT_ATTRIBUTE_NORMAL|3分量(x, y, z)表面法线
+  GLT_ATTRIBUTE_TEXTURE0|第一对2分量(s, t)纹理坐标
+  GLT_ATTRIBUTE_TEXTURE1|第二对2分量(s, t)纹理坐标
   
   * Uniform值
     * 单位(Identity)着色器
