@@ -67,11 +67,29 @@
   GLT_ATTRIBUTE_TEXTURE1|第二对2分量(s, t)纹理坐标
   
   * Uniform值
-    * 单位(Identity)着色器
-    * 平面(Flat)着色器
-    * 上色(Shaded)着色器
+    要对几何图形进行渲染，我们需要为对象递交**属性矩阵**，但是首先要绑定到我们想要使用的**着色器程序**，并提供程序的**Uniform值**。通过函数:
+    ```c++
+    GLShaderManager::UseStockShader(GLenum shader, ......);
+    ```
+    
+    * 单位(Identity)着色器: 简单地使用默认的笛卡尔坐标系(-1.0 ~ 1.0)，所有片段都应用同一颜色，几何图形为实心且未渲染。这种着色器只使用**GLT_ATTRIBUTE_VERTEX**，vColor参数包含了颜色:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_IDENTITY, GLfloat vColor[4]);
+    ```
+    
+    * 平面(Flat)着色器: 将统一着色器进行扩展，允许为几何图形变**换指定一个4x4的变换矩阵**，典型情况，这是一种**左乘模型视图矩阵和投影矩阵**，经常被称为“**模型试图投影矩阵**”。这种着色器只使用一个属性**GLT_ATTRIBUTE_VERTEX**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_FLAT, Glfloat mvp[16], Glfloat vColor);
+    ```
+    
+    * 上色(Shaded)着色器: 
+    
     * 默认光源着色器
+    
     * 电光源着色器
+    
     * 纹理替换矩阵
+    
     * 纹理调整着色器
+    
     * 纹理光源着色器
