@@ -82,14 +82,47 @@
     GLShaderManager::UseStockShader(GLT_SHADER_FLAT, Glfloat mvp[16], Glfloat vColor);
     ```
     
-    * 上色(Shaded)着色器: 
+    * 上色(Shaded)着色器: 提供一个变换矩阵，颜色值将被**平滑的插入到顶点之间**，使用两个属性**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_COLOR**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_SHADED, GLfloat mvp[16]);
+    ```
     
-    * 默认光源着色器
+    * 默认光源着色器: 这种着色器创造一种错觉，类似于由位于观察者位置的单漫射光。从本质上说，这种着色器使对象产生阴影和光照的效果。这里需要**模型视图矩阵**、**投影矩阵**和作为基本色的**颜色值**等Uniform值，所需要的属性**GLT_ATTRIBUTE_VERTEX**, **GLT_ATTRIBUTE_NORMAL**。大多数光照着色器需要**正规矩阵**作为Uniform值，着色器从模型视图矩阵中推到出了正规矩阵，但是效率不高:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_DEFAULT_LIGHT, GLfloat mvMatrix[16],
+                                                              GLfloat pMatrix[16], 
+                                                              GLfloat vColor[4]);
+    ```
     
-    * 电光源着色器
+    * 电光源着色器: 光源位置是固定的，接受4个Uniform值**模型视图矩阵**, **投影矩阵**, **视点坐标系中的光源位置**, **对象的基本漫反射颜色**，所需要的属性有**GLT_ATTRIBUTE_VERTEX**， **GLT_ATTRIBUTE_NORMAL**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, GLfloat mvMatrix[16], 
+                                                                 GLfloat pMatrix[16], 
+                                                                 GLfloat vLightPos[3],
+                                                                 GLfloat vColor[4]);
+    ```
     
-    * 纹理替换矩阵
+    * 纹理替换矩阵: 着色器通过给定的**模型视图矩阵**，使用绑定到**nTextUnit指定的纹理单元**的纹理对几何图形进行变换。**片段颜色**是直接从纹理样本中获取，所需要的属性有**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_NORMAL**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_TEXTURE_REPLACE, GLfloat mvpMaxtrix[16],
+                                                                GLint nTextureUnit);
+    ```
     
-    * 纹理调整着色器
+    * 纹理调整着色器: 着色器将一个**基本色**乘以一个取自**纹理单元nTextUnit的纹理**。所需要的属性**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_TEXTURE0**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_TEXTURE_MODULATE, GLfloat mvpMatrix[16],
+                                                                 GLfloat vColor[4],
+                                                                 GLint nTextureUnit);
+    ```
     
-    * 纹理光源着色器
+    * 纹理光源着色器: 这种着色器将一个纹理通过**漫反射照明计算进行调整**，光线在视觉空间中的位置是给定的。接受的Uniform值**模型视图矩阵**，**投影矩阵**，**视觉空间中的光源位置**，**几何图形的基本色**，**将要使用的纹理单元**。需要的属性**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_NORMAL**，**GLT_ATTRIBUTE_TEXTURE0**:
+    ```c++
+    GLShaderManager::UseStockShader(GLT_SHADER_TEXTURE_POINT_LIGHT_DIFF, GLfloat mvMatrix[16],
+                                                                         GLfloat pMatrix[16],
+                                                                         GLfloat vLightPos[3],
+                                                                         GLfloat vBaseColor[4],
+                                                                         GLint nTextureUnit);
+    ```
+
+## 将点连接起来
+  我们关心的不是物理屏幕的坐标像素，而是视景体中的**位置坐标**。将这些点、线、三角形从创建的**3D空间**投影到计算机**屏幕上的2D图形**则是**着色器程序**和**光栅化硬件**所要完成的工作。
