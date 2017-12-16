@@ -77,7 +77,7 @@
     GLShaderManager::UseStockShader(GLT_SHADER_IDENTITY, GLfloat vColor[4]);
     ```
     
-    * 平面(Flat)着色器: 将统一着色器进行扩展，允许为几何图形变**换指定一个4x4的变换矩阵**，典型情况，这是一种**左乘模型视图矩阵和投影矩阵**，经常被称为“**模型试图投影矩阵**”。这种着色器只使用一个属性**GLT_ATTRIBUTE_VERTEX**:
+    * 平面(Flat)着色器: 将统一着色器进行扩展，允许为几何图形变**换指定一个4x4的变换矩阵**，典型情况，这是一种**左乘模型视图矩阵和投影矩阵**，经常被称为“**模型视图投影矩阵**”。这种着色器只使用一个属性**GLT_ATTRIBUTE_VERTEX**:
     ```c++
     GLShaderManager::UseStockShader(GLT_SHADER_FLAT, Glfloat mvp[16], Glfloat vColor);
     ```
@@ -94,7 +94,7 @@
                                                               GLfloat vColor[4]);
     ```
     
-    * 电光源着色器: 光源位置是固定的，接受4个Uniform值**模型视图矩阵**, **投影矩阵**, **视点坐标系中的光源位置**, **对象的基本漫反射颜色**，所需要的属性有**GLT_ATTRIBUTE_VERTEX**， **GLT_ATTRIBUTE_NORMAL**:
+    * 点光源着色器: 光源位置是固定的，接受4个Uniform值**模型视图矩阵**, **投影矩阵**, **视点坐标系中的光源位置**, **对象的基本漫反射颜色**，所需要的属性有**GLT_ATTRIBUTE_VERTEX**， **GLT_ATTRIBUTE_NORMAL**:
     ```c++
     GLShaderManager::UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF, GLfloat mvMatrix[16], 
                                                                  GLfloat pMatrix[16], 
@@ -102,7 +102,7 @@
                                                                  GLfloat vColor[4]);
     ```
     
-    * 纹理替换矩阵: 着色器通过给定的**模型视图矩阵**，使用绑定到**nTextUnit指定的纹理单元**的纹理对几何图形进行变换。**片段颜色**是直接从纹理样本中获取，所需要的属性有**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_NORMAL**:
+    * 纹理替换矩阵着色器: 着色器通过给定的**模型视图矩阵**，使用绑定到**nTextUnit指定的纹理单元**的纹理对几何图形进行变换。**片段颜色**是直接从纹理样本中获取，所需要的属性有**GLT_ATTRIBUTE_VERTEX**，**GLT_ATTRIBUTE_NORMAL**:
     ```c++
     GLShaderManager::UseStockShader(GLT_SHADER_TEXTURE_REPLACE, GLfloat mvpMaxtrix[16],
                                                                 GLint nTextureUnit);
