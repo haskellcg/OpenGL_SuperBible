@@ -198,5 +198,33 @@ GL_TRIANGLES_STRIP|共用一个条带上的顶点的一组三角形
   * 三角形扇: GL_TRIANGLE_FAN
   
 #### 批次容器  
+  GLTools库中包含一个简单的容器类，叫做GBatch，它可以作为7种图元简单批次的容器使用，而且它还知道在使用GLShaderManager支持的任意存储着色器时如何对图元进行渲染
   ```c++
+  void GLBatch::Begin(GLenum primitive, GLint nVerts, GLuint nTextureUnits = 0);
+  
+  // 复制
+  void GLBatch::CopyVertexData3f(GLfloat *vVerts);
+  
+  // 复制表面法线、颜色、纹理坐标
+  void GLBatch::CopyNormalDataf(GLfloat *vNorms);
+  void GLBatch::CopyColorData4f(GLfloat *vColors);
+  void GLBatch::CopyTexCoordData2f(GLfloat *vTexCoords, GLuint uiTextureLayer);
+  
+  // End表明完成数据的复制
+  void GLBatch::End(void)
   ```
+  
+#### 不希望出现的几何图形  
+  在默认情况下，我们所渲染的每一个点、线、三角形都会在屏幕上进行光栅化
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
