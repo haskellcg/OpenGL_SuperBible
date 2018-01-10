@@ -261,7 +261,17 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   除了使用glPolygonOffset设置偏移之外，还必须启用多边形单独偏移来填充几何图形(GL\_POLYGON\_OFFSET\_FILL)、线(GL\_POLYGON\_OFFSET\_LINE)、点(GL\_POLYGON\_OFFSET\_POINT)。
   
 #### 剪裁
+  另外一种提高渲染性能的方法时只刷新屏幕上变化的部分，我们可能还需要将OpenGL渲染限制在窗口中一个较小的矩形中。默认情况下，剪裁框与窗口同样大小，并且不会进行剪裁测试。
+  ```c++
+  // 开启剪裁测试
+  glEnable(GL_SCISSOR_TEST);
+
+  // 指定剪裁窗口
+  glScissor(GLint x, GLint y, GLsizei width, GLsizei height);
+  ```
   
+## 混合
+  我们已经了解，通常情况下OpenGL渲染时把颜色值放在颜色缓冲区。每个片段的深度值也是放在深度缓冲区中
   
   
   
