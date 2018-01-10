@@ -271,9 +271,55 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   ```
   
 ## 混合
-  我们已经了解，通常情况下OpenGL渲染时把颜色值放在颜色缓冲区。每个片段的深度值也是放在深度缓冲区中
+  我们已经了解，通常情况下OpenGL渲染时把颜色值放在颜色缓冲区。每个片段的深度值也是放在深度缓冲区中。当深度测试被关闭，新的颜色值简单地覆盖颜色缓冲区中已经存在的其他值。当深度测试打开时，新的颜色片段只有当它们比原来的值更接近临近的裁减平面才会替换原来的颜色片段。
+
+  如果打开了混合功能，那么下层的颜色值就不会清除
+  ```c++
+  glEnable(GL_BLEND);
+  ```
   
-  
+#### 组合颜色
+  已经存储在颜色缓冲区中的颜色值叫做目标颜色值，这个颜色值包含了RGB以及一个可选的alpha值。
+
+  作为当前渲染命令的结果进入颜色缓冲区的颜色值称为源颜色。
+
+  当混合功能启用时，源颜色和目标颜色的组合方式是由混合方程式控制的：
+  ```c++
+  Cf = (Cs * S) + (Cd * D)
+  Cf: 最终计算产生的颜色
+  Cs: 源颜色
+  Cd: 目标颜色
+  S/D: 源或目标混合因子
+
+  glBlendFunc(GLenum S, GLenum D);
+  ```
+
+  S/D都是枚举值：
+
+  函数|RGB混合因子|Alpha混合因子
+  ----|-----------|-------------
+  GL\_ZERO|(0, 0, 0)|0
+  GL\_ONE|(1, 1, 1)|1
+  GL\_SRC\_COLOR|(Rs, Gs, Bs)|As
+  GL\_ONE\_MINUS\_SRC\_COLOR|(1, 1, 1) - (Rs, Gs, Bs)|1 - As
+  GL\_DST\_COLOR|(Rd, Gd, Bd)|Ad
+  GL\_ONE\_MINUS\_DST\_COLOR|(1, 1, 1) - (Rd, Gd, Bd)|1 - Ad
+  GL\_SRC\_ALPHA|(As, As, As)|As
+  GL\_ONE\_MINUS\_SRC\_ALPHA|(1, 1, 1) - (As, As, As)|1 - As
+  GL\_DST\_ALPHA|(Ad, Ad, Ad)|Ad
+  GL\_ONE\_MINUS\_DST\_ALPHA|(1, 1, 1) - (Ad, Ad, Ad)|1 - Ad
+  GL\_CONSTANT\_COLOR|(Rc, Gc, Bc)|Ac
+  GL\_ONE\_MINUS\_CONSTANT\_COLOR|(1, 1, 1) - (Rc, Gc, Bc)|1 - Ac
+  GL\_CONSTANT\_ALPHA|(Ac, Ac, Ac)|Ac
+  GL\_ONE\_MINUS\_CONSTANT\_ALPHA|(1, 1, 1) - (Ac, Ac, Ac)|1 - Ac
+  GL\_SRC\_ALPHA\_SATURATE|(f, f, f)[f = min(As, 1- Ad)]|1
+
+  ```c++
+  // 这个函数进场用于实现在其他一些不透明的物体前面绘制一个透明物体的效果
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC)
+  ```
+ 
+ #### 改变混合方程式
   
   
   
