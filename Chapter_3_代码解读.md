@@ -319,9 +319,29 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC)
   ```
  
- #### 改变混合方程式
-  
-  
-  
-  
-  
+#### 改变混合方程式
+  可用的混合方程模式：
+
+  模式|函数
+  ----|----
+  GL\_FUNC\_ADD|Cf = (Cs \* S) + (Cd \* D)
+  GL\_FUNC\_SUBTRACT|Cf = (Cs \* S) - (Cd \* D)
+  GL\_FUNC\_REVERSE\_SUBTRACT|Cf = (Cd \* D) - (Cs \* S)
+  GL\_MIN|Cf = min(Cs, Cd)
+  GL\_MAX|Cf = max(Cs, Cd)
+
+  ```c++
+  // 设置混合方程模式
+  void glBlendEquation(GLenum mode);
+
+  // 为RGB和alpha分别指定混合函数
+  void glBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB, GLenum srcAlpha, GLenum dstAlpha);
+  ```
+
+  方程式中常量的设定，例如GL\_CONSTANT\_COLOR：
+  ```c++
+  void glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
+  ```
+
+#### 抗锯齿
+
