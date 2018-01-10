@@ -132,12 +132,12 @@ OpenGL几何图元
 
 图元|描述
 ---|----
-GL_POINTS|每个顶点在屏幕上都是一个单独的点
-GL_LINES|每对对点对应一个线段
-GL_LINE_STRIP|一个从第一个顶点依次经过每个后续顶点而绘制的线条
-GL_LINE_LOOP|和GL_LINE_STRIP一样，但是最后一个顶点和第一个顶点也连接起来
-GL_TRIANGLES|每三个顶点定义一个新的三角形
-GL_TRIANGLES_STRIP|共用一个条带上的顶点的一组三角形
+GL\_POINTS|每个顶点在屏幕上都是一个单独的点
+GL\_LINES|每对对点对应一个线段
+GL\_LINE\_STRIP|一个从第一个顶点依次经过每个后续顶点而绘制的线条
+GL\_LINE\_LOOP|和GL\_LINE\_STRIP一样，但是最后一个顶点和第一个顶点也连接起来
+GL\_TRIANGLES|每三个顶点定义一个新的三角形
+GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
 
   * **点**: 指定一个允许范围之外的点大小并不会被认为是一个错误，相反，这种情况下将根据哪个值离指定值最近来使用所允许的最大值或者最小值。
   ```c++
@@ -194,8 +194,8 @@ GL_TRIANGLES_STRIP|共用一个条带上的顶点的一组三角形
   glFront(GL_CCW);
   ```
   
-  * 三角形带: GL_TRIANGLES_STRIP, **按照第一个三角形的环绕顺序进行后面三角形的绘制**，需要绘制大量三角形时，采用这种方式可以节省大量程序代码和数据空间，而且可以提高运算性能和节省宽带
-  * 三角形扇: GL_TRIANGLE_FAN
+  * 三角形带: GL\_TRIANGLES\_STRIP, **按照第一个三角形的环绕顺序进行后面三角形的绘制**，需要绘制大量三角形时，采用这种方式可以节省大量程序代码和数据空间，而且可以提高运算性能和节省宽带
+  * 三角形扇: GL\_TRIANGLE\_FAN
   
 #### 批次容器  
   GLTools库中包含一个简单的容器类，叫做GBatch，它可以作为7种图元简单批次的容器使用，而且它还知道在使用GLShaderManager支持的任意存储着色器时如何对图元进行渲染
@@ -211,12 +211,31 @@ GL_TRIANGLES_STRIP|共用一个条带上的顶点的一组三角形
   void GLBatch::CopyTexCoordData2f(GLfloat *vTexCoords, GLuint uiTextureLayer);
   
   // End表明完成数据的复制
-  void GLBatch::End(void)
+  void GLBatch::End(void);
   ```
   
 #### 不希望出现的几何图形  
-  在默认情况下，我们所渲染的每一个点、线、三角形都会在屏幕上进行光栅化
-  
+  在默认情况下，我们所渲染的每一个点、线、三角形都会在屏幕上进行光栅化，并且按照在组合图元批次时指定的顺序进行排列，这在某些情况下会产生问题。
+  * 油画法(painters algorithm)，对这些三角形进行排序
+  * 背面剔除
+  ```c++
+  glEnable(GL_CULL_FACE);
+  glDisable(GL_CULL_FACE);
+
+  // 指明剔除正面还是背面
+  // mode: GL_FRONT/GL_BACK/GL_FRONT_AND_BACK
+  glCullFace(GLenum mode);
+  ```
+
+#### 深度测试
+  深度测试时另外一种高效消除隐藏表面的技术。它的概念很简单：在绘制一个像素时，将一个值(称为z值)分配给它，这个值表示它到观察者的距离。我们在使用GLUT设置OpenGL窗口时，应该请求一个深度缓冲区。
+  ```c++
+  // 设置深度缓冲区
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH)
+
+  glEnable(GL_DEPTH_TEST)
+  ```
+
   
   
   
