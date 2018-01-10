@@ -178,6 +178,7 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   * **线环**:
 
 #### 三角形
+
   为了绘制实体表面，我们需要的不仅仅是点和线，还需要**多边形**，多边形是一个封闭的图形，它可以用**颜色**或者**纹理数据**进行填充，也可能不进行填充，在OpenGL中，**它是所有实体对象构建的基础**。
    
   可能存在的最简单的多边形就是**三角形**，光栅化硬件最欢迎三角形，而三角形已经是OpenGL中支持的**唯一一种多边形了**。
@@ -344,4 +345,64 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   ```
 
 #### 抗锯齿
+  OpenGL混合功能的另一个用途就是抗锯齿。
 
+  为了消除图元之间的锯齿状边缘，OpenGL使用混合功能来混合片段的颜色。
+
+  开启抗锯齿功能：
+  ```c++
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendEquation(GL_FUNC_ADD);
+
+  // 选择对点、线、多边形尽心抗锯齿处理
+  glEnable(GL_POINT_SMOOTH);
+  glEnable(GL_LINE_SMOOTH);
+  glEnable(GL_POLYGON_SMOOTH);
+  ```
+
+  对实心物体尽心抗锯齿处理并不常用，在很大程度上已经被一种更好的对3D几何图形平滑边缘的成为多重采用的方法代替。如果不采用多重采用，我们在使用重叠的抗锯齿直线时仍然可能遇到这种重叠几何图形问题。例如，对于线框模型，通常可以通过禁用深度测试避免直线交叉部分的深度人工痕迹。
+
+#### 多重采样
+  抗锯齿处理的最大优点之一就是能够使多边形的边缘更为平滑，使渲染效果显得更为自然和逼真。点和直线的平滑处理得到广泛支持，但是多边形的平滑处理并没有在所有平台上都得到实现，这是因为抗锯齿处理是基于混合操作的，这就需要从前到后对所有的图元进行排序，这是非常麻烦的。
+
+  OpenGL新增了一个特性，成为多重采样(multisampling)。它在颜色、深度、模板值的帧缓冲区额外添加一个缓冲区。所有的图元在每个像素上都进行了多次采样，其结果就存储在这个缓冲区中。每当这个像素进行更新时，这些采样值进行解析，以产生一个单独的值。
+
+  这种处理会带来额外的内存和处理器开销，有可能对性能造成影响，因此，有些OpenGL实现可能并不支持多渲染环境中的多重采样。
+
+  ```c++
+  // 获取支持多重采样帧缓冲区的渲染环境
+  glInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_MULTISAMPLE);
+
+  // 打开或关闭
+  glEnable(GL_MULTISAMPLE);
+  glDisable(GL_MULTISAMPLE);
+  ```
+
+  当多重采样被启用时，点、直线、多边形的平滑特性都将被忽略，这意味着在使用多重采样时，就不能同时使用点和直线的平滑处理。
+  ```c++
+  glDisable(GL_MULTISAMPLE);
+  glEnable(GL_POINT_SMOOTH);
+
+
+  // Draw some smooth points
+  // ...
+
+  glDiable(GL_POINT_SMOOTH);
+  glEnable(GL_MULTISAMPLE);
+  ```
+
+  对于性能敏感的程序员常常会不辞幸苦地对所有绘图命令进行排序，这样需要相同状态的几何图形就可以一起绘制。这种状态排序是在游戏中常用的提高速度的方法之一。
+
+  多重采样缓冲区在默认情况下使用片段的RGB值，并不包含alpha成分，修改此行为：
+  ```c++
+  // 使用alpha值
+  GL_SAMPLE_ALPHA_TO_COVERAGE
+
+  // 将alpha值设为1并使用它
+  GL_SAMPLE_ALPHA_TO_ON
+
+  // 使用glSampleCoverage所设置的值
+  GL_SAMPLE_COVERAGE
+  void glSampleCoverage(GLclampf value, GLboolean invert);
+  ```
