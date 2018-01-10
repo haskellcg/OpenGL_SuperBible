@@ -231,14 +231,36 @@ GL\_TRIANGLES\_STRIP|共用一个条带上的顶点的一组三角形
   深度测试时另外一种高效消除隐藏表面的技术。它的概念很简单：在绘制一个像素时，将一个值(称为z值)分配给它，这个值表示它到观察者的距离。我们在使用GLUT设置OpenGL窗口时，应该请求一个深度缓冲区。
   ```c++
   // 设置深度缓冲区
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH)
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-  glEnable(GL_DEPTH_TEST)
+  // 如果没有深度缓冲区，那么启动深度测试命令将被忽略
+  glEnable(GL_DEPTH_TEST);
+  ```
+  就算背面剔除能够消除对象背面的三角形，那么如果时重叠的独立对象又该怎么办？采用油画法，会导致在同一片区域重复进行绘制，而每一次绘制都会产生性能开销。如果开销过大则导致光栅化过程变慢，我们将这种方式成为"填充受限"。但是将油画法颠倒过来，实际上会加速填充性能，这样可以利用深度测试消除那些已存在的像素。
+
+#### 多边形模式
+  默认情况下，多边形是作为实行图形绘制的，但我们可以通过将多边形指定为显示轮廓或只有点(只显示顶点)来改变这种行为。
+  ```c++
+  // face: GL_FRONT/GL_BACK/GL_FRONT_AND_BACK
+  // mode: GL_FILL/GL_LINE/GL_POINT
+  void glPolygonMode(GLenum face, GLenum mode);
   ```
 
+#### 多边形偏移
+  虽然深度测试能够实现真实视觉并提高性能，但有时也会带来一些小麻烦，我们可能需要稍微蒙骗它一下，这种情况发生在有意将两个图形绘制到同一位置。例如贴花(decaling)，这种情况成为z-fighting(z冲突)。
+
+  可以通过第二次绘制时在z方向稍微做一点偏移来解决问题，但我们必须小心确保只能沿着z轴向镜头方向移动。
+
+  ```c++
+  // Depth_Offset = (DZ * factor) + (r * units)
+  // DZ: 深度值相对于多边形屏幕区域的变化量
+  // r: 使深度缓冲区值产生变化的最小值
+  void glPolygonOffset(GLfloat factor, GLfloat units);
+  ```
+
+  除了使用glPolygonOffset设置偏移之外，还必须启用多边形单独偏移来填充几何图形(GL\_POLYGON\_OFFSET\_FILL)、线(GL\_POLYGON\_OFFSET\_LINE)、点(GL\_POLYGON\_OFFSET\_POINT)。
   
-  
-  
+#### 剪裁
   
   
   
