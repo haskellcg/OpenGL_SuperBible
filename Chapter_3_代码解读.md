@@ -60,11 +60,11 @@
   
   标识符|描述
   -----|----
-  GLT_ATTRIBUTE_VERTEX|3分量(x, y, z)顶点位置
-  GLT_ATTRIBUTE_COLOR|4分量(r, g, b, a)颜色值
-  GLT_ATTRIBUTE_NORMAL|3分量(x, y, z)表面法线
-  GLT_ATTRIBUTE_TEXTURE0|第一对2分量(s, t)纹理坐标
-  GLT_ATTRIBUTE_TEXTURE1|第二对2分量(s, t)纹理坐标
+  GLT\_ATTRIBUTE\_VERTEX|3分量(x, y, z)顶点位置
+  GLT\_ATTRIBUTE\_COLOR|4分量(r, g, b, a)颜色值
+  GLT\_ATTRIBUTE\_NORMAL|3分量(x, y, z)表面法线
+  GLT\_ATTRIBUTE\_TEXTURE0|第一对2分量(s, t)纹理坐标
+  GLT\_ATTRIBUTE\_TEXTURE1|第二对2分量(s, t)纹理坐标
   
   * Uniform值
     要对几何图形进行渲染，我们需要为对象递交**属性矩阵**，但是首先要绑定到我们想要使用的**着色器程序**，并提供程序的**Uniform值**。通过函数:
