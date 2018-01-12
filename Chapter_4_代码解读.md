@@ -241,10 +241,42 @@
   // iSlices：表示围绕球体排列的三角形对数
   // 典型情况下一个对称性较好的球体的片段数目是堆叠数目的2倍
   // 另外，这些球体都是围绕z轴的，这样+z就是球体的顶部，-z就是球体的底部
-  void glMakeSphere(GLTriangleBatch &sphereBatch,
-                    GLfloat fRadius,
-                    GLint iSlices,
-                    GLint iStacks);
+  void gltMakeSphere(GLTriangleBatch &sphereBatch,
+                     GLfloat fRadius,
+                     GLint iSlices,
+                     GLint iStacks);
   ```
 
 ### 4.5.3 创建一个花托
+  ```c++
+  // numMajor/numMinor：沿着主半径和内部较小半径的细分单元的数量
+  void gltMakeTorus(GLTriangleBatch &torusBatch,
+                    GLfloat majorRadius,
+                    GLfloat minorRadius,
+                    GLint numMajor,
+                    GLint numMinor);
+  ```
+
+### 4.5.4 创建一个圆柱或圆锥
+  ```c++
+  // fLength：应该是高度
+  void gltMakeCylinder(GLTriangleBatch &cylinderBatch,
+                       GLfloat baseRadius,
+                       GLfloat topRadius,
+                       GLfloat fLength,
+                       GLint numSlices,
+                       GLint numStacks);
+  ```
+  理解：基本几何图形需要的参数都会以GLfloat的参数给出，GLint指出的三角形带的数目只是为了提高三角形的密度。
+
+### 4.5.5 创建一个圆盘
+  ```c++
+  void gltMakeDisk(GLTriangleBatch &diskBatch,
+                   GLfloat innerRadius,
+                   GLfloat outerRadius,
+                   GLint nSlices,
+                   GLint nStacks);
+  ```
+
+## 4.6 投影矩阵
+
