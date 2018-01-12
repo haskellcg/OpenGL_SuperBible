@@ -321,3 +321,75 @@
   ```
 
 ## 4.7 变换管线
+  初始顶点 => [模型视图矩阵] => 变换的视觉坐标 => [投影矩阵] =>
+  剪裁坐标 => [透视除法] => 规范化的设备坐标 => [顶点变换管线...] =>
+  [视口变换] => 窗口坐标
+
+### 4.7.1 使用矩阵堆栈
+  在分层方式中，一个或多个对象会相对于另一个对象进行绘制，在这种方式中经常会应用到变换。这样就需要大量有用户代码进行构造和管理的矩阵在3D空间中建立复杂场景。
+
+  习惯上，我们使用矩阵堆栈。GLMatrixStack类，这个类的构造函数允许指定堆栈的最大深度，默认的堆栈深度为64。这个矩阵堆栈在初始化时已经在堆栈中包含了单位矩阵。
+  ```c++
+  GLMatrixStack::GLMatrixStack(int iStackDepth = 64);
+
+  void GLMatrixStack::LoadIdentity(void);
+
+  void GLMatrixStack::LoadMatrix(const M3DMatrix44f m);
+
+  // 用一个矩阵乘以矩阵堆栈的顶部矩阵，相乘得到的结果随后存储在堆栈顶部
+  void GLMatrixStack::MultMatrix(const M3DMatrix44f m);
+
+  // 获取矩阵堆栈顶部的值
+  const M3DMatrix44f &GLMatrixStack::GetMatrix(void);
+  void GLMatrixStack::GetMatrix(M3DMatrix44f mMatrix);
+
+
+  // Pop/Push
+  void GLMatrixStack::PushMatrix(void);
+  void GLMatrixStack::PushMatrix(const M3DMatrix44f mMatrix);
+  void GLMatrixStack::PushMatrix(GLFrame &frame);
+
+  void GLMatrixStack::PopMatrix(void);
+
+
+  // 放射变换，这些函数可以创建适当的矩阵，然后用这个矩阵乘以矩阵堆栈顶部的元素
+  void GLMatrixStack::Rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+  void GLMatrixStack::Translate(GLfloat x, GLfloat y, GLfloat z);
+  void GLMatrixStack::Scale(GLfloat x, GLfloat y, GLfloat z);
+  ```
+
+### 4.7.2 管理管线
+  为模型视图矩阵和投影矩阵都建立一个矩阵堆栈会有很多优势，我们还经常需要检索这两种矩阵并将它们相乘得到模型视图投影矩阵。另一种有用的矩阵就是正规矩阵，它用来进行光照计算，并且可以从模型视图矩阵推到出来。
+
+  另一个实用类GLGeometryTransform为我们跟踪记录这两种矩阵堆栈，并快速检索模型视图投影矩阵的顶部或者正规矩阵堆栈的顶部。
+
+  SphereWorld:
+  ```c++
+  GLMatrixStack modelViewMatrix;
+  GLMatrixStack projectionMatrix;
+  GLFrustum viewFrustum;
+  GLGeometryTransform transformPipeline;
+
+  viewFrustum.SetPerspective(35.0f, float(nWidth) / float(nHeight), 1.0f, 1000.0f);
+  projectionMatrix.LoadMatrix(viewFrustum.GetProjectionMatrix());
+
+  // 将transformPipeline的内部指针指向两个矩阵堆栈
+  transformPipeline.SetMatrixStacks(modelViewMatrix, projectionMatrix);
+
+  modelViewMatrix.PushMatrix();
+  shaderManager.UseStockShader(GLT_SHADER_FLAT,
+                               transformPipeline.GetModelViewProjectionMatrix(),
+                               vFloorColor);
+  floorBatch.Draw();
+
+  modelViewMatrix.Translate(0.0f, 0.0f, -2.5f);
+  modelViewMatrix.Rotate(yRot, 0.0f, 1.0f, 0.0f);
+  shaderManager.UseStockShader(GLT_SHADER_FLAT,
+                               transformPipeline.GetModelViewProjectionMatrix(),
+                               vTorusColor);
+  torusBatch.Draw();
+
+  modelViewMatrix.PopMatrix();
+  ```
+
+### 4.7.3 加点调料
