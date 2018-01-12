@@ -407,3 +407,75 @@
   ```
 
 ## 4.8 使用照相机和角色进行移动
+  固定的物体(例如地形，或者SphereWorld中的地板)通常不进行变换，它们的顶点通常准确地指定几何图形在空间应该怎样进行绘制。在场景中移动的物体通常成为角色(Actor)，就像舞台上的演员一样。
+
+  角色有它们自己的变换，而且角色的变换常常不仅与全局坐标系有关，也与其他角色有关。每个有自己的变换角色都被称为有自己的参考帧，或者本地对象坐标系。
+
+  在本地和全局坐标系之间进行转换常常时有用的，而且对于许多非渲染相关的几何图形测试来说也是如此。
+
+### 4.8.1 角色帧
+  帧包含空间中的一个位置、一个指向前方的向量、一个指向上方的向量，使用这些量，我们可以在空间中唯一确定一个给定的位置和方向。
+  ```c++
+  class GLFrame
+  {
+  protected:
+      M3DVector3f vLocation;
+      M3DVector3f vUp;
+      M3DVector3f vForward;
+
+  public:
+      ...
+  };
+  ```
+
+  获取4x4矩阵：
+  ```c++
+  void GLFrame::GetMatrix(M3DMatrix44f mMatrix, bool bRotationOnly = false)
+  {
+      // 计算向右的向量
+      M3DVector3f vXAxis;
+      m3dCrossProduct(vXAxis, vUp, vForward);
+
+      // 设置矩阵列，并没有填充第四个值
+      m3dSetMatrixColumn44(mMatrix, vXAxis, 0);
+      mMatrix[3] = 0.0f;
+
+      // Y列
+      m3dSetMatrixColumn44(mMatrix, vUp, 1);
+      mMatrix[7] = 0.0f;
+
+      // Z列
+      m3dSetMatrixColumn44(mMatrix, vForward, 2);
+      mMatrix[11] = 0.0f;
+
+      // 平移
+      if (bRotationOnly){
+          mMatrix[12] = 0.0f;
+          mMatrix[13] = 0.0f;
+          mMatrix[14] = 0.0f;
+      } else {
+          m3dMatrixMultiple44(mMatrix, vOrigin, 3);
+      }
+      mMatrix[15] = 1.0f;
+  }
+  ```
+
+### 4.8.2 欧拉角："卢克！请使用帧"
+  欧拉角(Euler angles)，使用的空间更少：
+  ```c++
+  struct EULER
+  {
+      M3DVector3f vPosition;
+      GLfloat fRoll;
+      GLfloat fPitch;
+      GLfloat fYaw;
+  };
+  ```
+
+  一个给定的位置和方向可以用一组以上的欧拉角来表示，当试图判断物体时如何从一个方向平滑地移动到另一个方向时，有多组角度就可能导致问题。
+
+  围绕一个轴进行旋转，最后，当简单地向前移动视线时，计算新的欧拉角显得非常麻烦。
+
+  目前，有一些文献视图用一种成为四元组的数学工具来解决欧拉角问题。
+
+### 4.8.3 照相机管理
