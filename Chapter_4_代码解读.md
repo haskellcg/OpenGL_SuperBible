@@ -279,4 +279,45 @@
   ```
 
 ## 4.6 投影矩阵
+  到目前为止，我们已经在屏幕或窗口上使用了范围-1到+1的默认坐标系。事实上，这个小小的坐标范围确实是硬件唯一能够接受的。
 
+  那么使用不同坐标系的技巧就是，将我们想要的坐标系变换到这个单位立方体中。使用投影矩阵。
+
+### 4.6.1 正投影
+  ```c++
+  GLFrustum::SetOrthographic(GLfloat xMin, GLfloat xMax,
+                             GLfloat yMin, GLfloat yMax,
+                             GLfloat zMin, GLfloat zMax);
+  ```
+
+### 4.6.2 透视投影
+  ```c++
+  GLFrustum::SetPerspective(float fFov,
+                            float fAspect,
+                            float fNear,
+                            float fFar);
+  ```
+
+### 4.6.3 模型视图矩阵
+  ModelviewProject
+
+  使用CStopWatch类来基于经过的时间长短设置旋转速度，我们应该根据经过的时间设置动画率，而不是单纯的基于帧的方式：
+  ```c++
+  static CStopWatch rotTimer;
+  float yRot = rotTimer.GetElapsdSeconds() * 60.0f;
+  ```
+
+  添加模型视图、投影矩阵：
+  ```c++
+  viewFrustum.SetPerspective(35.0f, float(w) / flloat(h), 1.0f, 1000.0f);
+
+  m3dMatrixMultiple44(mModelview, mTranslate, mRotate);
+  m3dMatrixMultiple44(mModelViewProjection,
+                      viewFrustum.GetProjectionMatrix(),
+                      mModelview);
+
+  shaderManager.UseStockShader(GLT_SHADER_FLAT, mModelViewProjection, vBlack);
+  torusBatch.Draw();
+  ```
+
+## 4.7 变换管线
