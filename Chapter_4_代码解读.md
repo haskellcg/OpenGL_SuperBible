@@ -183,3 +183,37 @@
   ```
 
 ### 4.4.2 运用模型视图矩阵
+  在屏幕上先平移然后旋转正方形：
+  ```c++
+  void RenderScene(void)
+  {
+      // Clear the window with current clearing color
+      glClear(GL_COLOR_BUFFER_BIT |
+              GL_DEPTH_BUFFER_BIT |
+              GL_STENCIL_BUFFER_BIT);
+
+      GLfloat vRed[] = {1.0f, 0.0f, 0.0f, 1.0f};
+
+      M3DMatrix44f mFinalTransform, mTranslationMatrix, mRotationMatrix;
+
+      // Just Translate
+      m3dTranslationMatrix44(mTranslationMatrix, xPos, yPos, 0.0f);
+
+      // Rotate 5 degrees every tine we redraw
+      static float yRot = 0.0f;
+      yRot += 5.0f;
+      m3dRotationMatrix44(mRotationMatrix, m3dDegToRad(yRot), 0.0f, 0.0f, 1.0f);
+
+      m3dMatrixMultiple44(mFinalTransform, mTranslationMatrix, mRotationMatrix);
+
+      shaderManager.UseStockShader(GLT_SHADER_FLAT, mFinalTransform, vRed);
+      squareBatch.Draw();
+
+      // Perform the buffer swap
+      glutSwapBuffers();
+  }
+  ```
+
+  然而，这个简单的坐标系并不是总能满足我们的需要，而且在更大的坐标空间中考虑我们的对象会更加方便，需要一种类型的矩阵变换，成为投影。
+
+## 4.5 更多对象
