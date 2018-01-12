@@ -108,3 +108,78 @@
 
 ## 4.4 模型视图矩阵
   模型视图矩阵是一个4x4矩阵，它表示一个表换后的坐标系，我们可以用来放置对象和确认对象的方向。
+
+  我们为图元提供的顶点将作为一个单位矩阵(也就是一个向量)的形式来使用，并乘以一个模型视图矩阵来获得一个相对于视觉坐标系的经过变换的新坐标系。
+
+### 4.4.1 矩阵构造
+  OpenGL将矩阵表示为由一个16个浮点数组成的单个数组：
+  ```c++
+  // Nice OpenGL friendly matrix
+  GLfloat matrix[16];
+
+  // Popular, but not as efficient for OpenGL
+  GLfloat matrix[4][4];
+  ```
+
+  列优先排序，两种形式的矩阵互为转置矩阵。
+  ```c++
+  GLfloat matrix[16] = {
+    Xx, Yx, Zx, Tx,
+    Xy, Yy, Zy, Ty,
+    Xz, Yz, Zz, Tz,
+    0,  0,  0,  0
+  };
+  ```
+
+  最奇妙的是，如果有一个包含一个不同坐标系的位置和方向的4x4矩阵，然后用一个表示原来坐标系的向量乘以这个矩阵，得到的结果是一个转换到新坐标系下的新向量。
+
+  单位矩阵：本书中使用的的哥着色器就是单位着色器
+  ```c++
+  GLfloat m[] = {
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f
+  };
+
+  M3DMatrix44f m = {
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f
+  };
+
+  // math3d库函数，初始化一个空单位矩阵
+  void m3dLoadIdentity44(M3DMatrix44f m);
+  ```
+
+  平移：
+  ```c++
+  void m3dTranslationMatrix44(M3DMatrix44f m, float x, float y, float z);
+  ```
+
+  旋转：将一个对象沿着3个坐标轴的一个或任意向量进行旋转，需要找到一个旋转矩阵
+  ```c++
+  // 生成旋转矩阵
+  // 围绕(x, y, z)指定的向量进行旋转，旋转的角度沿逆时针方向按照弧度计算
+  m3dRotationMatrix44(M3DMatrix44f m, float angle, float x, float y, float z);
+
+  // for example
+  M3DMatrix44f m;
+  m3dRotationMatrix44(m, m3dDegToRad(45.0), 1.0f, 1.0f, 1.0f);
+  ```
+
+  缩放：
+  ```c++
+  M3DMatrix44f m;
+  void m3dScaleMatrix44(M3DMatrix44f m, float xScale, float yScale, float zScale);
+  ```
+
+  综合变换：将两种变换加在一起很简单，只需要将两个矩阵相乘。不过在矩阵乘法中有一个小陷阱需要注意，就是运算的顺序是有影响的。
+  ```c++
+  void m3dMatrixMultiple44(M3DMatrix44f product,
+                           const M3DMatrix44f a,
+                           const M3DMatrix44f b);
+  ```
+
+### 4.4.2 运用模型视图矩阵
