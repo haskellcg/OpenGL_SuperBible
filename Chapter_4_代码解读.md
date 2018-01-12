@@ -531,8 +531,31 @@
 ### 4.8.4 添加更多角色
   为了在场景中添加这些球体，我们需要一个位置的列表：
   ```c++
+  #define NUM_SPHERES 50
+  GLFrame spheres[NUM_SPHERES];
+
+  for (int i = 0; i < NUM_SPHERES; ++i){
+      GLfloat x = ((GLfloat)((rand() % 400) - 200) * 0.1f);
+      GLfloat z = ((GLfloat)((rand() % 400) - 200) * 0.1f);
+      spheres[i].SetOrigin(x, 0.0f, z);
+  }
+
+  ...
+  floorBatch.Draw();
+  for (int i = 0; i < NUM_SPHERES; ++i){
+      modelViewMatrix.PushMatrix();
+      modelViewMatrix.MultMatrix(spheres[i]);
+      shaderManager.UseStockShader(GLT_SHADER_FLAT,
+                                   transformPipeline.GetModelViewProjectionMatrix(),
+                                   vSphereColor);
+      modelViewMatrix.PopMatrix();
+  }
   ```
 
+### 4.8.5 关于光线
+  典型情况下，我们会设置变换矩阵，将它们传递到着色器，然后硬件完成所有顶点的变换。对于光源来说，典型情况下，我们的做法会有些不同。
+
+  光源位置也需要转换到视觉坐标系，但是传递到着色器的矩阵变换是几何图形，而不是光线。
 
 
 
