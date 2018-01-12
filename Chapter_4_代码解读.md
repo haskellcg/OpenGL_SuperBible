@@ -479,3 +479,88 @@
   目前，有一些文献视图用一种成为四元组的数学工具来解决欧拉角问题。
 
 ### 4.8.3 照相机管理
+  照相机，帮助我们理解某些类型的3D环境中管理观察点。如果把照相机想像成一种物体，它在空间中具有一些位置和一些特定的方向，就会发现当前的参考帧系统在3D环境中既可以用角色表示，也可以用照相机表示。
+
+  为了应用照相机变换，我们使用照相机的角色变换并对它进行反转，这样向后移动照相机就相当于向前移动整个场景。
+  ```c++
+  保存单位矩阵
+    应用照相机变换
+    绘制不会移动的物体
+    绘制移动的物体(角色)
+      应用照相机变换
+      应用角色变换
+      绘制角色几何图形
+      恢复照相机变换
+  恢复单位矩阵
+  ```
+
+  类包含一个GLFrame函数，这个函数用来检索条件适合的照相机矩阵：
+  ```c++
+  void GetCameraMatrix(M3DMatrix44f m, bool bRotationOnly = false);
+  ```
+
+  所谓的天空盒只是一个带有天空图片的大盒子。随着我们移动，天空盒也应该跟着移动，但是我们并不希望能够走到天空的尽头。
+  ```c++
+  void SpecialKeys(int key, int x, int y)
+  {
+      float linear = 0.1f;
+      float angular = float(m3dDegToRad(5.0f));
+
+      if (GLUT_KEY_UP == key){
+          cameraFrame.MoveForward(linear);
+      }
+
+      if (GLUT_KEY_DOWN == key){
+          cameraFrame.MoveForward(-linear);
+      }
+
+      if (GLUT_KEY_LEFT == key){
+          cameraFrame.RotateWorld(angular, 0.0f, 1.0f, 0.0f);
+      }
+
+      if (GLUT_KEY_RIGHT == key){
+          cameraFrame.RotateWorld(-angular, 0.0f, 1.0f, 0.0f);
+      }
+  }
+
+  M3DMatrix44f mCamera;
+  cameraFrame.GetCameraMatrix(mCamera);
+  modelViewMatrix.PushMatrix(mCamera);
+  ```
+
+### 4.8.4 添加更多角色
+  为了在场景中添加这些球体，我们需要一个位置的列表：
+  ```c++
+  ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 尝试
+  * 照相机的GetCameraMatrix改为GetMatrix
+  * 添加蓝色球体，尝试不同的变换
