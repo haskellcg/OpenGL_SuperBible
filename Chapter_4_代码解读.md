@@ -557,6 +557,15 @@
 
   光源位置也需要转换到视觉坐标系，但是传递到着色器的矩阵变换是几何图形，而不是光线。
 
+  讲一个固定光源位置变换到视觉坐标相对简单:
+  ```c++
+  M3DVector4f vLightPos = {0.0f, 1.0f, 5.0f, 1.0f};
+  M3DVector4f vLightEyePos;
+  m3dTranslationVector4(vLightSysPos, vLightPos, mCamera);
+  ```
+
+
+
 
 
 
