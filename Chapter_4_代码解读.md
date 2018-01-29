@@ -564,34 +564,14 @@
   m3dTranslationVector4(vLightSysPos, vLightPos, mCamera);
   ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  渲染一个蓝色球体，并使用正确的着色器专递uniform值:
+  ```c++
+  shaderManaer.UseStockShader(GLT_SHADER_POINT_LIGHT_DIFF,
+                              transformPipeline.GetModelViewMatrix(),
+                              transformPipeline.GetProjectionMatrix(),
+                              vLightEyePos,
+                              bSphereColor);
+  ```
 
 ## 尝试
   * 照相机的GetCameraMatrix改为GetMatrix
