@@ -111,3 +111,40 @@
   此外，如果我们指定一个与图形硬件的本地排列不同的像素布局，那么在数据进行重定格式时将产生额外的性能开销。
 
 ### 5.1.3 包装的像素格式
+  包装的像素格式将颜色数据压缩到了尽可能少的存储位中，每个颜色通道的位数显示在常量中
+  ```c++
+  UNSIGNED_BYTE_3_3_2
+  +-+-+-+-+-+-+-+-+
+  + 1st + 2nd + 3 +
+  +-+-+-+-+-+-+-+-+
+
+  UNSIGNED_BYTE_2_3_3_REV
+  +-+-+-+-+-+-+-+-+
+  + 3 + 2nd + 1st +
+  +-+-+-+-+-+-+-+-+
+  ```
+
+  对于glReadPixels函数来说，读取操作在双缓冲区渲染环境下将在后台缓冲区进行，而在但缓冲区渲染环境下则在前台缓冲区进行，我们可以使用下面的函数改变这些像素操作的源:
+  ```c++
+  // GL_FRONT
+  // GL_BACK
+  // GL_LEFT
+  // GL_RIGHT
+  // GL_FRONT_LEFT
+  // GL_FRONT_RIGHT
+  // GL_BACK_LEFT
+  // BL_BACK_RIGHT
+  void glReadBuffer(GLenum mode);
+  ```
+
+### 5.1.4 保存像素
+  GLTools库中的glWriteTGA函数从前台颜色缓冲区中读取颜色数据，并将这些数据存储到一个Target文件格式的图像文件中。
+  ```c++
+  // 捕获当前视口，并将它保存位一个targa文件
+  // 确保在调用这个函数之前，在双缓冲区环境下调用SwapBuffers，而在單缓冲区环境下调用glFinish
+  GLint gltWriteTGA(const char *szFileName)
+  {
+      FILE *pFile;                      // 文件指针
+      TGAHEADER tgaHeader;              // TGA文件头
+  }
+  ```
