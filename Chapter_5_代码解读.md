@@ -16,6 +16,7 @@
   ```
 
   glPixelStore参数:
+
   参数名|类型|初始值
   ------|----|------
   GL\_PACK\_SWAP\_BYTES|GLboolean|GL\_FALSE
@@ -24,4 +25,89 @@
   GL\_UNPACK\_LSB\_FIRST|GLboolean|GL\_FALSE
   GL\_PACK\_ROW\_LENGTH|GLint|0
   GL\_UNPACK\_ROW\_LENGTH|GLint|0
-  GL\_PACK\_SKIP
+  GL\_PACK\_SKIP\_ROWS|GLint|0
+  GL\_UNPACK\_SKIP\_ROWS|GLint|0
+  GL\_PACK\_SKIP\_PIXELS|GLint|0
+  GL\_UNPACK\_SKIP\_PIXELS|GLint|0
+  GL\_PACK\_ALIGNMENT|GLint|0
+  GL\_UNPACK\_ALIGNMENT|GLint|0
+  GL\_PACK\_IMGAE\_HEIGHT|Glint|0
+  GL\_UNPACK\_IMAGE\_HEIGHT|GLint|0
+  GL\_PACK\_SKIP\_IMAGES|Glint|0
+  GL\_UNPACK\_SKIP\_IMAGES|GLint|0
+
+### 5.1.2 像素图
+  在当今全彩色的计算机系统中，更加有趣并且更加实用一些的是像素图(pixmap)。像素图在内存布局上与位图非常相似，但是每一个像素将需要一个以上的存储位表示。每个像素的附加位允许存储强度(intensity，有时被称为亮度，即luminance值)或者颜色分量值。
+
+  在OpenGL核心版本中，我们无法直接将一个像素图绘制到颜色缓冲区中，但是可以使用下面的函数将颜色缓冲区的内容作为像素图直接读取:
+  ```c++
+  // x, y指定矩形左下角的窗口坐标
+  // width, height指定窗口的大小
+  // format指定pixels指向的数据元素的颜色布局
+  // type解释参数pixels指向的数据
+  void glReadPixels(GLint x,
+                    GLint y,
+                    GLSizei width,
+                    GLSizei height,
+                    GLenum format,
+                    GLenum type,
+                    const void *pixels);
+  ```
+
+  format枚举值:
+
+  常量|描述
+  ----|----
+  GL\_RGB|按照红、绿、蓝顺序排列的颜色
+  GL\_RGBA|按照红、绿、蓝、Alpha顺序排列的颜色
+  GL\_BGR|按照蓝、绿、红顺序排列的颜色
+  GL\_BGRA|按照蓝、绿、红、Alpha顺序排列的颜色
+  GL\_RED|每个像素只包含一个红色分量
+  GL\_GREEN|每个像素只包含一个绿色分量
+  GL\_BLUE|每个像素只包含一个蓝色分量
+  GL\_RG|每个像素一次包含一个红色和一个绿色分量
+  GL\_RED\_INTEGER|每个像素包含一个整数形式的红色分量
+  GL\_GREEN\_INTEGER|每个像素包含一个整数形式的绿色分量
+  GL\_BLUE\_INTEGER|每个像素包含一个整数形式的蓝色分量
+  GL\_RG\_INTEGER|每个像素一次包含一个整数形式的红色、绿色分量
+  GL\_RGB\_INTEGER|每个像素一次包含整数形式的红色、绿色、蓝色分量
+  GL\_RGBA\_INTEGER|每个像素一次包含整数形式的红色、绿色、蓝色、Alpha分量
+  GL\_BGR\_INTEGER|每个像素一次包含整数形式的蓝色、绿色、红色分量
+  GL\_BGRA\_INTEGER|每个像素一次包含整数形式的蓝色、绿色、红色、Alpha分量
+  GL\_STENCIL\_INDEX|每个像素只包含一个模板值
+  GL\_DEPTH\_COMPONENT|每个像素只包含一个深度值
+  GL\_DEPTH\_STENCIL|每个像素包含一个深度值、模板值
+
+  type枚举值:
+
+  常量|描述
+  ----|----
+  GL\_UNSIGNED\_BYTE|每种颜色分量都是8位无符号整数
+  GL\_BYTE|8位有符号整数
+  GL\_UNSIGNED\_SHORT|16位无符号整数
+  GL\_SHORT|16位有符号整数
+  GL\_UNSIGNED\_INT|32位无符号整数
+  GL\_INT|32位有符号整数
+  GL\_FLOAT|单精度浮点数
+  GL\_HALF\_FLOAT|半精度浮点数
+  GL\_UNSIGNED\_BYTE\_3\_2\_2|包装的RGB值
+  GL\_UNSIGNED\_BYTE\_2\_3\_3\_REV|包装的RGB值
+  GL\_UNSIGNED\_SHORT\_5\_6\_5|包装的RGB值
+  GL\_UNSIGNED\_SHORT\_5\_6\_5\_REV|包装的RGB值
+  GL\_UNSIGNED\_SHORT\_4\_4\_4\_4|包装的RGBA值
+  GL\_UNSIGNED\_SHORT\_4\_4\_4\_4\_REV|包装的RGBA值
+  GL\_UNSIGNED\_SHORT\_5\_5\_5\_1|包装的RGBA值
+  GL\_UNSIGNED\_SHORT\_1\_5\_5\_5\_REV|包装的RGBA值
+  GL\_UNSIGNED\_INT\_8\_8\_8\_8|包装的RGBA值
+  GL\_UNSIGNED\_INT\_8\_8\_8\_8\_REV|包装的RGBA值
+  GL\_UNSIGNED\_INT\_10\_10\_10\_2|包装的RGBA值
+  GL\_UNSIGNED\_INT\_2\_10\_10\_10\_REV|包装的RGBA值
+  GL\_UNSIGNED\_INT\_24\_8|包装的RGBA值
+  GL\_UNSIGNED\_INT\_10F\_11F\_11F\_REV|包装的RGBA值
+  GL\_FLOAT\_32\_UNSIGNED\_INT\_24\_8\_REV|包装的RGBA值
+
+  有必要指出，glReadPixels从图形硬件中复制数据，通常通过总线传输到系统内存。在这种情况下，应用程序将被阻塞，直到内存传输完成。
+
+  此外，如果我们指定一个与图形硬件的本地排列不同的像素布局，那么在数据进行重定格式时将产生额外的性能开销。
+
+### 5.1.3 包装的像素格式
