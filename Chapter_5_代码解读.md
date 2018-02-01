@@ -146,5 +146,9 @@
   {
       FILE *pFile;                      // 文件指针
       TGAHEADER tgaHeader;              // TGA文件头
+      unsigned long lImageSize;         // 图像大小，用字节表示
+      GLbyte *pBits = NULL;             // 指向位的指针
+      GLint iViewport[4];               // 以像素表示的视口
+      GLenum lastBuffer;                // 存储当前的读取缓冲区设置
   }
   ```
