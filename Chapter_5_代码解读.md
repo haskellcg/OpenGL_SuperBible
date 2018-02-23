@@ -150,5 +150,76 @@
       GLbyte *pBits = NULL;             // 指向位的指针
       GLint iViewport[4];               // 以像素表示的视口
       GLenum lastBuffer;                // 存储当前的读取缓冲区设置
+
+      // 获取视口大小
+      glGetIntegrev(GL_VIEWPORT, iViewport);
+
+      // 图像应该多大
+      lImageSize = iViewport[2] * 3 * iViewport[3];
+
+      // 分配块，如果这种操作不起作用则返回
+      pBits = (GLbyte *)malloc(lImageSize);
+      if (NULL == pBits){
+          return 0;
+      }
+
+      // 从颜色缓冲区读取位
+      glPixelStorei(GL_PACK_ALIGNMENT, 1);
+      glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+      glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+      glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+
+      // 获取当前读取缓冲区设置并进行保存
+      // 切换到前台缓冲区并进行读取操作，最后恢复读取缓冲区状态
+      glGetIntegerv(GL_READ_BUFFER, &lastBuffer);
+      glReadBuffer(GL_FRONT);
+      glReadPixels(0, 0, iViewport[2], iViewport[3], GL_BGR, 
+                   GL_UNSIGNED_BYTE, pBits);
+      glReadBuffer(lastBuffer);
+
+      // 初始化Targa头
+      tgaHeader.identsize = 0;
+      tgaHeader.colorMapType = 0;
+      tgaHeader.imageType = 2;
+      tgaHeader.colorMapStart = 0;
+      tgaHeader.colorMapLength = 0;
+      tgaHeader.colorMapBits = 0;
+      tgaHeader.xstart = 0;
+      tgaHeader.ystart = 0;
+      tgaHeader.width = iViewport[2];
+      tgaHeader.height = iViewport[3];
+      tgaHeader.bits = 24;
+      tgaHeader.descriptor = 0;
+
+      // 为大小字节存储顺序问题为进行字节交换
+  #ifndef __APPLE__
+      LITTLE_ENDIAN_WORD(&tgaHeader.colorMapStart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.colorMapLength);
+      LITTLE_ENDIAN_WORD(&tgaHeader.xstart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.ystart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.width);
+      LITTLE_ENDIAN_WORD(&tgaHeader.height);
+  #endif
+
+      // 尝试打开
+      pFile = fopen(szFileName, "wb");
+      if (NULL == pFile){
+          free(pFile);
+          return 0;
+      }
+
+      // 写入文件头
+      fwrite(&tgaHeader, sizeof(TGAHEADER), 1, pFile);
+
+      // 写入图像数据
+      fwrite(pBits, lImageSize, l, pFile);
+
+      // 释放临时缓冲区并关闭文件
+      free(pBits);
+      fclose(pFile);
+
+      return 1;
   }
   ```
+
+### 5.1.5 读取像素
