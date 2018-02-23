@@ -402,3 +402,26 @@
   OpenGL还支持立方图纹理。OpenGL会在调用这些函数中的一个时间从data中复制纹理信息。这种数据复制可能会有很大的开销。
 
 ### 5.2.1 使用颜色缓冲区
+  一维和二维纹理也可以从颜色缓冲区加载数据。我们可以从颜色缓冲区读取一幅图像，并通过下面函数将它作为一个新的纹理使用
+  ```c++
+  void glCopyTextImage1D(GLenum target,
+                         GLint level,
+                         GLenum internalformat,
+                         GLint x,
+                         GLint y,
+                         GLsizei width,
+                         GLint border);
+
+  void glCopyTextImage1D(GLenum target,
+                         GLint level,
+                         GLenum internalformat,
+                         GLint x,
+                         GLint y,
+                         GLsizei width,
+                         GLsizei height
+                         GLint border);
+  ```
+
+  源缓冲区是通过glReadBuffer函数设置的，并不存在glCopyTextImage3D，因为我们无法从2D颜色缓冲区获取体积数据。
+
+### 5.2.2 更新纹理
