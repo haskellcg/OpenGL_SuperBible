@@ -223,3 +223,129 @@
   ```
 
 ### 5.1.5 读取像素
+  Targe图像格式时一种方便而且容易使用的图像格式，并且它既支持简单颜色图像，也支持带有Alpha值的图像:
+  ```c++
+  /**
+   * @brief 进行内存定位并载入targa位，返回指向新的缓冲区，纹理的高度、宽度、OpenGL数据格式
+   *        结束时在缓冲区调用free
+   *        只支持targa，只能是8位、24位、32位，没有调色板、RLE编码
+   */
+  GLbyte *gltReadTGABites(const char *szFileName,
+                          GLint *iWidth,
+                          GLint *iHeight,
+                          GLint *iComponents,
+                          GLenum *eFormat)
+  {
+      FILE *pFile;                  // 文件指针
+      TGAHEADER tgaHeader;          // TGA文件头
+      unsigned long lImageSize;     // 图像大小，用字节表示
+      short sDepth;                 // 像素深度
+      GLbyte pBits = NULL;         // 指向位的指针
+
+      // 默认/失败值
+      *iWidth = 0;
+      *iHeight = 0;
+      *eFormat = GL_RGB;
+      *iComponents = GL_RGB;
+
+      // 尝试打开文件
+      pFile = fopen(szFileName, "rb");
+      if (NULL == pFile){
+          return NULL;
+      }
+
+      // 读入文件头
+      fread(&tgaHeader, sizeof(TGAHEADER), 1, pFile);
+
+      // 大小端处理
+  #ifndef __APPLE__
+      LITTLE_ENDIAN_WORD(&tgaHeader.colorMapStart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.colorMapLength);
+      LITTLE_ENDIAN_WORD(&tgaHeader.xstart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.ystart);
+      LITTLE_ENDIAN_WORD(&tgaHeader.width);
+      LITTLE_ENDIAN_WORD(&tgaHeader.height);
+  #endif
+
+      // 获取纹理
+      *iWidth = tgaHeader.width;
+      *iHeight = tgaHeader.height;
+      sDepth = tgaHeader.bits / 8;
+
+      // 有效性校验
+      if ((tgaHeader.bits != 8) && 
+          (tgaHeader.bits != 24) && 
+          (tgaHeader.bits != 32)){
+          return NULL;
+      }
+
+      // 计算图像缓冲区大小
+      lImageSize = tgaHeader.width * tgaHeader.height * sDepth;
+
+      // 进行内存定位并进行成功校验
+      pBits = (GLbyte *)malloc(lImageSize * sizeof(GLbyte));
+      if (NULL == pBits){
+          return NULL;
+      }
+
+      // 读入位
+      // 检查读取错误，这项操作应该发现RLE或者其他我们不想识别的奇怪格式
+      if (1 != fread(pBits, lImageSize, 1, pFile)){
+          free(pBits);
+          return NULL;
+      }
+
+      // 设置希望的OpenGL格式
+      switch (sDepth){
+  #ifdef OPENGL_ES:
+      case 3:
+          *eFormat = GL_BGR;
+          *iComponents = GL_RGB;
+          break;
+  #endif
+  #ifdef WIN32:
+      case 3:
+          *eFormat = GL_BGR;
+          *iComponents = GL_RGB;
+          break;
+  #endif
+  #ifdef linux:
+      case 3:
+          *eFormat = GL_BGR;
+          *iComponents = GL_RGB;
+          break;
+  #endif
+
+      case 4:
+          *eFormat = GL_BGRA;
+          *iComponents = GL_RGBA;
+          break;
+
+      case 1:
+          *eFormat = GL_LUMINANCE;
+          *iComponents = GL_LUMINANCE;
+          break;
+
+      default:
+          // 如果是在iPhone上，TGA位BGR，并且iPhone不支持没有Alpha的BGR，但它支持RGB，所以
+          // 只要将红色和蓝色调整一下就能满足要求
+          // 但是为了加快iPhone的载入速度，请保存带有Alpha的TGA
+      #ifdef OPENGL_ES:
+          for (int i = 0; i < lImageSize; i += 3){
+              GLbyte temp = pBits[i];
+              pBits[i] = pBits[i + 2];
+              pBits[i + 2] = temp;
+          }
+      #endif
+          break;
+      }
+
+      fclose(pFile);
+
+      return pBits;
+  }
+  ```
+
+  分量的数量并没有设置为1、3、4，而是设置为GL\_LUMINANCE8、GL\_RGB8、GL\_RGBA8。OpenGL识别这些特殊的常量是为了在操作图像数据时保持完整的内部精度。
+
+## 5.2 载入纹理
