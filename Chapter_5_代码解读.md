@@ -349,3 +349,56 @@
   分量的数量并没有设置为1、3、4，而是设置为GL\_LUMINANCE8、GL\_RGB8、GL\_RGBA8。OpenGL识别这些特殊的常量是为了在操作图像数据时保持完整的内部精度。
 
 ## 5.2 载入纹理
+  有3个OpenGL函数最经常用来从存储器缓冲区中载入纹理数据:
+  ```c++
+  void glTextImage1D(GLenum target,
+                     GLint level,
+                     GLint internalformat,
+                     GLsizei width,
+                     GLint border,
+                     GLenum format,
+                     GLenum type,
+                     void *data);
+
+  void glTextImage2D(GLenum target,
+                     GLint level,
+                     GLint internalformat,
+                     GLsizei width,
+                     GLsizei height,
+                     GLint border,
+                     GLenum format,
+                     GLenum type,
+                     void *data);
+
+  /**
+   * @brief 
+   * @param GLenum target, GL_TEXTURE_1D/GL_TEXTURE_2D/GL_TEXTURE_3D，也可以指定代理纹理
+   *                       方法指定GL_PROXY_TEXTURE_1D/GL_PROXY_TEXTURE_2D/
+   *                       GL_PROXY_TEXTURE_3D
+   * @param GLint level, 指定函数所加载的mip贴图层次
+   * @param GLint internalformat, 在每个纹理单元中存储多少颜色成分、以及纹理是否压缩，可选
+   *                              GL_ALPHA/GL_LUMINANCE/GL_LUMINANCE_ALPHA/GL_RGB/GL_RGBA
+   * @param GLsizei width，必须是2的幂
+   * @param GLsizei height，必须是2的幂
+   * @param GLsizei depth，必须是2的幂
+   * @param GLint border，位纹理贴图指定一个边界宽度
+   * @param GLenum format, glDrawPixels
+   * @param GLenum type, glDrawPixels
+   * @param GLenum data, glDrawPixels
+   * @return void
+   */
+  void glTextImage3D(GLenum target,
+                     GLint level,
+                     GLint internalformat,
+                     GLsizei width,
+                     GLsizei height,
+                     GLsizei depth,
+                     GLint border,
+                     GLenum format,
+                     GLenum type,
+                     void *data);
+  ```
+
+  OpenGL还支持立方图纹理。OpenGL会在调用这些函数中的一个时间从data中复制纹理信息。这种数据复制可能会有很大的开销。
+
+### 5.2.1 使用颜色缓冲区
