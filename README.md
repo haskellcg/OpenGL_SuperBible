@@ -1,4 +1,4 @@
-# OpenGL_SuperBible
+# Reading_OpenGL_SuperBible
 
 ## 对应的测试项目
   [haskell_opengltest(vs2013项目)](https://github.com/haskellcg/CPlusPlus_Projects/tree/master/haskell_opengltest)
